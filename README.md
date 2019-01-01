@@ -18,7 +18,7 @@ These [requirements](https://github.com/nteske/Drawing-App-Design-Patterns/blob/
 
 # Preview
 
-[screenshot](https://raw.githubusercontent.com/nteske/Drawing-App-Design-Patterns/master/screenshots/image.jpg)
+* [screenshot](https://raw.githubusercontent.com/nteske/Drawing-App-Design-Patterns/master/screenshots/image.jpg)
 
 # Further help
 
