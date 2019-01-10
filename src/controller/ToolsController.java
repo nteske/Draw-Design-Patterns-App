@@ -114,18 +114,36 @@ public class ToolsController implements Serializable{
 	
 	public void undoCommand() {
 		if(model.getUndoStack().size()!=0) {
+		do {
+		Command old=model.getUndoStack().peek();
 		model.doUndo();
+		if(!isRemoveCommand(old))break;
+		}
+		while(!model.getUndoStack().isEmpty()&&isRemoveCommand(model.getUndoStack().peek()));
+		
+		if(enterSelecting)selectShape(null);
 		frame.getView().repaint();
 		updateButtons();
-		if(enterSelecting)selectShape(null);
 		}else JOptionPane.showMessageDialog(null, "List is empty", "Undo command:", JOptionPane.INFORMATION_MESSAGE);
+	}
+	private boolean isRemoveCommand(Command cmd) {
+		if(cmd instanceof RemovePoint||cmd instanceof RemoveLine||cmd instanceof RemoveSquare||cmd instanceof RemoveRectangle||cmd instanceof RemoveCircle||cmd instanceof RemoveHexagonAdapter)
+		return true;
+		else return false;
 	}
 	public void redoCommand() {
 		if(model.getRedoStack().size()!=0) {
-		model.doRedo();
+			
+		do {
+			Command old=model.getRedoStack().peek();
+			model.doRedo();
+			if(!isRemoveCommand(old))break;
+		}
+		while(!model.getRedoStack().isEmpty()&&isRemoveCommand(model.getRedoStack().peek()));
+		
+		if(enterSelecting)selectShape(null);
 		frame.getView().repaint();
 		updateButtons();
-		if(enterSelecting)selectShape(null);
 		}else JOptionPane.showMessageDialog(null, "List is empty", "Redo command:", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
@@ -158,11 +176,14 @@ public class ToolsController implements Serializable{
 	}
 	public void selectShape(ActionEvent e) {
 		if(enterSelecting) {
-			enterSelecting=false;frame.getSelViews().getBtnSelect().setBackground(null);
-			for(int i=model.getAll().size()-1;i>=0;i--)model.get(i).setSelected(false);
+			enterSelecting=false;
+			frame.getSelViews().getBtnSelect().setBackground(null);
+			for(int i=model.getAll().size()-1;i>=0;i--)
+				model.get(i).setSelected(false);
 			frame.getView().repaint();
 			}
-		else {enterSelecting=true;frame.getSelViews().getBtnSelect().setBackground(btnColor);}
+		else {enterSelecting=true;
+		frame.getSelViews().getBtnSelect().setBackground(btnColor);}
 	}
 	public boolean isEnterSelecting() {
 		return enterSelecting;
@@ -330,5 +351,6 @@ public class ToolsController implements Serializable{
 			frame.getView().repaint();
 		}else JOptionPane.showMessageDialog(null, "Shape is already back.");
 	}
+
 
 }
