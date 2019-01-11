@@ -37,6 +37,10 @@ public class SerializableFileLoader implements AssetLoader {
         		s.addObserver(observer);
         		model.add(s);
         	}
+			if(s.isSelected()) {
+					if(!frame.getToolsController().isEnterSelecting())
+					frame.getToolsController().selectShape(null);
+					break;}
 		}
         
       /* String text=frame.getLogView().getLogPane().getText();

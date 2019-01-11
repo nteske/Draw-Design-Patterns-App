@@ -1,6 +1,5 @@
 package shapes.circle;
 
-import java.util.logging.Logger;
 
 import shapes.Command;
 
@@ -10,7 +9,6 @@ public class UpdateCircle implements Command {
 	private Circle oldState;
 	private Circle newState;
 	private Circle originalState;
-	private Logger globalLogger = Logger.getLogger("global");
 	public UpdateCircle(Circle originalState, Circle newState) {
 		this.originalState = originalState;
 		this.newState = newState;
@@ -23,7 +21,7 @@ public class UpdateCircle implements Command {
 		originalState.setRadius(newState.getRadius());
 		originalState.setColor(newState.getColor());
 		originalState.setInnerColor(newState.getInnerColor());
-		globalLogger.info(oldState.toString()+"_to_"+originalState.toString());
+		originalState.setSelected(newState.isSelected());
 	}
 
 	@Override
@@ -32,7 +30,7 @@ public class UpdateCircle implements Command {
 		originalState.setRadius(oldState.getRadius());
 		originalState.setColor(oldState.getColor());
 		originalState.setInnerColor(oldState.getInnerColor());
-		globalLogger.info(oldState.toString()+"_to_"+originalState.toString());
+		originalState.setSelected(oldState.isSelected());
 	}
 
 }

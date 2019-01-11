@@ -13,16 +13,10 @@ public class LogHandler extends Handler {
 		}
 		  @Override
 		  public void publish(LogRecord record) {
-		      StringBuilder sb = new StringBuilder();
-		      String[] name=record.getSourceClassName().split("\\.");
-		      sb.append(name[name.length-1])
-		        .append("_")
-		        .append(record.getSourceMethodName())
-		        .append("_")
-		        .append(record.getMessage());
-		      System.out.println(sb.toString());
+
+		      System.out.println(record.getMessage());
 		      String text=frame.getLogView().getLogPane().getText();
-		      frame.getLogView().getLogPane().setText(text+sb.toString()+"\n");
+		      frame.getLogView().getLogPane().setText(text+record.getMessage()+"\n");
 		  }
 
 		  @Override

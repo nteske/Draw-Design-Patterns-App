@@ -7,20 +7,27 @@ import java.io.Serializable;
 import frame.DrawingFrame;
 import hexagon.Hexagon;
 import model.DrawingModel;
+import shapes.Command;
 import shapes.Shape;
 import shapes.ShapeObserver;
 import shapes.circle.AddCircle;
 import shapes.circle.Circle;
+import shapes.circle.UpdateCircle;
 import shapes.hexagon.AddHexagonAdapter;
 import shapes.hexagon.HexagonAdapter;
+import shapes.hexagon.UpdateHexagonAdapter;
 import shapes.line.AddLine;
 import shapes.line.Line;
+import shapes.line.UpdateLine;
 import shapes.point.AddPoint;
 import shapes.point.Point;
+import shapes.point.UpdatePoint;
 import shapes.rectangle.AddRectangle;
 import shapes.rectangle.Rectangle;
+import shapes.rectangle.UpdateRectangle;
 import shapes.square.AddSquare;
 import shapes.square.Square;
+import shapes.square.UpdateSquare;
 
 public class DrawingController implements Serializable {
 	/**
@@ -46,8 +53,9 @@ public class DrawingController implements Serializable {
 				Point p = new Point(arg0.getX(), arg0.getY(), frame.getToolsController().getOuter());
 				p.addObserver(new ShapeObserver(model, frame));
 				AddPoint cmdAddPoint = new AddPoint(model, p); 
-				cmdAddPoint.execute(); 
-				model.addUndo(cmdAddPoint);
+				cmdAddPoint.execute();
+				frame.getToolsController().LogCommand(cmdAddPoint, true, p, null);
+				frame.getToolsController().addUndo(cmdAddPoint,frame.getToolsController().transCmd(cmdAddPoint, true, p, null));
 				frame.getView().repaint();
 				frame.getToolsController().updateButtons();
 			}
@@ -55,13 +63,71 @@ public class DrawingController implements Serializable {
 			for(int i=model.getAll().size()-1;i>=0;i--){
 				Shape s=model.get(i);
 				if(s.contains(arg0.getX(), arg0.getY())) {
-					s.setSelected(!s.isSelected());
+					doCommandUpdateSelected(s,!s.isSelected());
 					break;
 				}
 			}
 			
 			frame.getView().repaint();
+			frame.getToolsController().updateButtons();
 		}
+	}
+	
+	public void doCommandUpdateSelected(Shape s,boolean state) {
+		Command cmd=null;
+		if(s instanceof Point) {
+			Point p=(Point)s;
+			Point c=p.clone();
+			c.setSelected(state);
+			cmd=new UpdatePoint(p,c);
+			frame.getToolsController().LogCommand(cmd, true, p, c);
+			frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, p, c));
+
+		}
+		else if(s instanceof Line) {
+			Line p=(Line)s;
+			Line c=p.clone();
+			c.setSelected(state);
+			cmd=new UpdateLine(p,c);
+			frame.getToolsController().LogCommand(cmd, true, p, c);
+			frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, p, c));
+
+		}
+		else if(s instanceof Rectangle) {
+			Rectangle p=(Rectangle)s;
+			Rectangle c=p.clone();
+			c.setSelected(state);
+			cmd=new UpdateRectangle(p,c);
+			frame.getToolsController().LogCommand(cmd, true, p, c);
+			frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, p, c));
+		}
+		else if(s instanceof Square) {
+			Square p=(Square)s;
+			Square c=p.clone();
+			c.setSelected(state);
+			cmd=new UpdateSquare(p,c);
+			frame.getToolsController().LogCommand(cmd, true, p, c);
+			frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, p, c));
+
+		}
+		else if(s instanceof Circle) {
+			Circle p=(Circle)s;
+			Circle c=p.clone();
+			c.setSelected(state);
+			cmd=new UpdateCircle(p,c);
+			frame.getToolsController().LogCommand(cmd, true, p, c);
+			frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, p, c));
+		}
+		else if(s instanceof HexagonAdapter) {
+			HexagonAdapter p=(HexagonAdapter)s;
+			HexagonAdapter c=p.clone();
+			c.setSelected(state);
+			cmd=new UpdateHexagonAdapter(p,c);
+			frame.getToolsController().LogCommand(cmd, true, p, c);
+			frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, p, c));
+		}
+		
+		cmd.execute();
 	}
 
 	public void moveLines(MouseEvent arg0) {
@@ -109,7 +175,8 @@ public class DrawingController implements Serializable {
 			if(l.length()>3) {
 				AddLine cmd=new AddLine(model,l);
 				cmd.execute();
-				model.addUndo(cmd);
+				frame.getToolsController().LogCommand(cmd, true, l, null);
+				frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, l, null));
 			}
 			}
 			if(frame.getToolsController().getSelection()==3) {
@@ -121,7 +188,8 @@ public class DrawingController implements Serializable {
 			if(s.surfaceArea()>3) {
 				AddSquare cmd=new AddSquare(model, s);
 				cmd.execute();
-				model.addUndo(cmd);
+				frame.getToolsController().LogCommand(cmd, true, s, null);
+				frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, s, null));
 			}
 			}
 			
@@ -132,8 +200,9 @@ public class DrawingController implements Serializable {
 			r.addObserver(observer);
 			if(r.surfaceArea()>3) {
 				AddRectangle cmd=new AddRectangle(model, r);
+				frame.getToolsController().LogCommand(cmd, true, r, null);
 				cmd.execute();
-				model.addUndo(cmd);
+				frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, r, null));
 			}
 			}			
 			
@@ -143,8 +212,9 @@ public class DrawingController implements Serializable {
 			c.addObserver(observer);
 			if(c.getRadius()>3) {
 				AddCircle cmd=new AddCircle(model, c);
+				frame.getToolsController().LogCommand(cmd, true, c, null);
 				cmd.execute();
-				model.addUndo(cmd);
+				frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, c, null));
 			}
 			}
 			
@@ -155,8 +225,9 @@ public class DrawingController implements Serializable {
 			h.addObserver(observer);
 			if(h.getHexagon().getR()>3) {
 				AddHexagonAdapter cmd=new AddHexagonAdapter(model, h);
+				frame.getToolsController().LogCommand(cmd, true, h, null);
 				cmd.execute();
-				model.addUndo(cmd);
+				frame.getToolsController().addUndo(cmd,frame.getToolsController().transCmd(cmd, true, h, null));
 			}
 			}
 			

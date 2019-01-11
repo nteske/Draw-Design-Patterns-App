@@ -1,4 +1,4 @@
-package modify;
+package dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -157,6 +157,7 @@ public class DialogPoint extends JDialog {
 		int crdX=Integer.parseInt(cordinateX.getText());
 		int crdY=Integer.parseInt(cordinateY.getText());
 		point=new Point(crdX,crdY,pntColor);
+		point.setSelected(true);
 		confirm=true;
 		setVisible(false);
 		dispose();

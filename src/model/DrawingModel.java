@@ -16,6 +16,8 @@ public class DrawingModel implements Serializable{
 	private Stack<Command> undoStack=new Stack<Command>();
 	private Stack<Command> redoStack=new Stack<Command>();
 	
+	private Stack<String> undoStackLog=new Stack<String>();
+	private Stack<String> redoStackLog=new Stack<String>();
 	public ArrayList<Shape> getAll() {
 		return shapes;
 	}
@@ -32,23 +34,28 @@ public class DrawingModel implements Serializable{
 		shapes.remove(s);
 	}
 
-	public void addUndo(Command c) {
-		undoStack.add(c);
-		redoStack.clear();
-	}
-	public void doUndo() {
-		undoStack.peek().unexecute();
-		redoStack.push(undoStack.pop());
-	}
-	public void doRedo() {
-		redoStack.peek().execute();
-		undoStack.push(redoStack.pop());
-	}
+
 	public Stack<Command> getUndoStack(){
 		return undoStack;
 	}
 	public Stack<Command> getRedoStack(){
 		return redoStack;
+	}
+
+	public Stack<String> getUndoStackLog() {
+		return undoStackLog;
+	}
+
+	public void setUndoStackLog(Stack<String> undoStackLog) {
+		this.undoStackLog = undoStackLog;
+	}
+
+	public Stack<String> getRedoStackLog() {
+		return redoStackLog;
+	}
+
+	public void setRedoStackLog(Stack<String> redoStackLog) {
+		this.redoStackLog = redoStackLog;
 	}
 
 }

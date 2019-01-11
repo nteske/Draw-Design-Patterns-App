@@ -3,23 +3,23 @@ package controller;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 
-
+import dialogs.DialogCircle;
+import dialogs.DialogHexagon;
+import dialogs.DialogLine;
+import dialogs.DialogPoint;
+import dialogs.DialogRectangle;
+import dialogs.DialogSquare;
 import frame.DrawingFrame;
 import model.DrawingModel;
-import modify.DialogCircle;
-import modify.DialogHexagon;
-import modify.DialogLine;
-import modify.DialogPoint;
-import modify.DialogRectangle;
-import modify.DialogSquare;
-import position.BringToBack;
-import position.BringToFront;
-import position.ToBack;
-import position.ToFront;
+import position.BringToBackCommand;
+import position.BringToFrontCommand;
+import position.ToBackCommand;
+import position.ToFrontCommand;
 import shapes.Command;
 import shapes.Shape;
 import shapes.circle.Circle;
@@ -36,6 +36,7 @@ import shapes.point.RemovePoint;
 import shapes.point.UpdatePoint;
 import shapes.rectangle.Rectangle;
 import shapes.rectangle.RemoveRectangle;
+import shapes.rectangle.UpdateRectangle;
 import shapes.square.RemoveSquare;
 import shapes.square.Square;
 import shapes.square.UpdateSquare;
@@ -51,6 +52,7 @@ public class ToolsController implements Serializable{
 	private final Color btnColor=Color.gray;
 	private Color inner=Color.WHITE,outer=Color.BLACK;
 	private boolean enterSelecting=false;
+	private Logger globalLogger = Logger.getLogger("global");
 	public ToolsController(DrawingModel model, DrawingFrame frame) {
 		this.model = model;
 		this.frame = frame;
@@ -116,15 +118,22 @@ public class ToolsController implements Serializable{
 		if(model.getUndoStack().size()!=0) {
 		do {
 		Command old=model.getUndoStack().peek();
-		model.doUndo();
+		doUndo();
 		if(!isRemoveCommand(old))break;
 		}
 		while(!model.getUndoStack().isEmpty()&&isRemoveCommand(model.getUndoStack().peek()));
-		
-		if(enterSelecting)selectShape(null);
+		ActivateSel();
 		frame.getView().repaint();
 		updateButtons();
 		}else JOptionPane.showMessageDialog(null, "List is empty", "Undo command:", JOptionPane.INFORMATION_MESSAGE);
+	}
+	private void ActivateSel() {
+		for (Shape s : model.getAll()) {
+			if(s.isSelected()) {
+				if(!frame.getToolsController().isEnterSelecting())
+				frame.getToolsController().selectShape(null);
+				break;}
+    	 }
 	}
 	private boolean isRemoveCommand(Command cmd) {
 		if(cmd instanceof RemovePoint||cmd instanceof RemoveLine||cmd instanceof RemoveSquare||cmd instanceof RemoveRectangle||cmd instanceof RemoveCircle||cmd instanceof RemoveHexagonAdapter)
@@ -136,12 +145,12 @@ public class ToolsController implements Serializable{
 			
 		do {
 			Command old=model.getRedoStack().peek();
-			model.doRedo();
+			doRedo();
 			if(!isRemoveCommand(old))break;
 		}
 		while(!model.getRedoStack().isEmpty()&&isRemoveCommand(model.getRedoStack().peek()));
 		
-		if(enterSelecting)selectShape(null);
+		ActivateSel();
 		frame.getView().repaint();
 		updateButtons();
 		}else JOptionPane.showMessageDialog(null, "List is empty", "Redo command:", JOptionPane.INFORMATION_MESSAGE);
@@ -179,12 +188,14 @@ public class ToolsController implements Serializable{
 			enterSelecting=false;
 			frame.getSelViews().getBtnSelect().setBackground(null);
 			for(int i=model.getAll().size()-1;i>=0;i--)
-				model.get(i).setSelected(false);
+				if(model.get(i).isSelected())
+					frame.getController().doCommandUpdateSelected(model.get(i),false);
 			frame.getView().repaint();
 			}
 		else {enterSelecting=true;
 		frame.getSelViews().getBtnSelect().setBackground(btnColor);}
 	}
+
 	public boolean isEnterSelecting() {
 		return enterSelecting;
 	}
@@ -212,17 +223,39 @@ public class ToolsController implements Serializable{
 					cmd=new RemoveHexagonAdapter(model, (HexagonAdapter) s);
 				}
 				else continue;
-				s.setSelected(false);
+				LogCommand(cmd, true, s, null);
 				cmd.execute();
-				model.addUndo(cmd);
+				addUndo(cmd,transCmd(cmd, true, s, null));
 				
 			}
 		}
 		updateButtons();
 		frame.getView().repaint();
 	}
+	public void LogCommand(Command cmd,boolean state,Shape shape1,Shape shape2) {
+		String text=transCmd(cmd,state,shape1,shape2);
+		globalLogger.info(text);
+	}
+	public String transCmd(Command cmd,boolean state,Shape shape1,Shape shape2)
+	{
+		StringBuilder sb = new StringBuilder();
+		String exec,creation;
+		if(state)exec="execute";
+		else exec="unexecute";
+		if(shape2!=null)
+			creation=shape1.toString()+"_to_"+shape2.toString();
+		else
+			creation=shape1.toString();
+	      sb.append(cmd.getClass().getSimpleName())
+	        .append("_")
+	        .append(exec)
+	        .append("_")
+	        .append(creation);
+	      return sb.toString();
+	}
 	public void modifyShape(ActionEvent e) {
 		Shape selected=new Point();
+		Command cmd=null;
 		for(int i=model.getAll().size()-1;i>=0;i--) {
 			if(model.get(i).isSelected()) {selected=model.get(i);break;}
 		}
@@ -231,11 +264,9 @@ public class ToolsController implements Serializable{
 			view.setPoint((Point)selected);
 			view.setVisible(true);
 			if(view.isConfirm()) {
-				UpdatePoint cmd=new UpdatePoint((Point)selected, view.getPoint());
-				cmd.execute();
-				model.addUndo(cmd);
-				updateButtons();
-				frame.getView().repaint();
+				 cmd=new UpdatePoint((Point)selected, view.getPoint());
+				 LogCommand(cmd, true, selected, view.getPoint());
+				 addUndo(cmd,transCmd(cmd, true,selected, view.getPoint()));
 			}
 		}
 		else if(selected instanceof Line) {
@@ -243,11 +274,9 @@ public class ToolsController implements Serializable{
 			view.setLine((Line)selected);
 			view.setVisible(true);
 			if(view.isConfirm()) {
-				UpdateLine cmd=new UpdateLine((Line)selected, view.getLine());
-				cmd.execute();
-				model.addUndo(cmd);
-				updateButtons();
-				frame.getView().repaint();
+				 cmd=new UpdateLine((Line)selected, view.getLine());
+				 LogCommand(cmd, true, selected, view.getLine());
+				 addUndo(cmd,transCmd(cmd, true,  selected, view.getLine()));
 			}
 		}
 		else if(selected instanceof Rectangle) {
@@ -255,11 +284,9 @@ public class ToolsController implements Serializable{
 			view.setRectangle((Rectangle)selected);
 			view.setVisible(true);
 			if(view.isConfirm()) {
-				UpdateSquare cmd=new UpdateSquare((Rectangle)selected, view.getRectangle());
-				cmd.execute();
-				model.addUndo(cmd);
-				updateButtons();
-				frame.getView().repaint();
+				 cmd=new UpdateRectangle((Rectangle)selected, view.getRectangle());
+				 LogCommand(cmd, true, selected, view.getRectangle());
+				 addUndo(cmd,transCmd(cmd, true, selected, view.getRectangle()));
 			}
 		}
 		else if(selected instanceof Square) {
@@ -267,11 +294,9 @@ public class ToolsController implements Serializable{
 			view.setSquare((Square)selected);
 			view.setVisible(true);
 			if(view.isConfirm()) {
-				UpdateSquare cmd=new UpdateSquare((Square)selected, view.getSquare());
-				cmd.execute();
-				model.addUndo(cmd);
-				updateButtons();
-				frame.getView().repaint();
+				 cmd=new UpdateSquare((Square)selected, view.getSquare());
+				 LogCommand(cmd, true, selected, view.getSquare());
+				 addUndo(cmd,transCmd(cmd, true, selected, view.getSquare()));
 			}
 		}
 		else if(selected instanceof Circle) {
@@ -279,11 +304,9 @@ public class ToolsController implements Serializable{
 			view.setCircle((Circle)selected);
 			view.setVisible(true);
 			if(view.isConfirm()) {
-				UpdateCircle cmd=new UpdateCircle((Circle)selected, view.getCircle());
-				cmd.execute();
-				model.addUndo(cmd);
-				updateButtons();
-				frame.getView().repaint();
+				 cmd=new UpdateCircle((Circle)selected, view.getCircle());
+				 LogCommand(cmd, true, selected, view.getCircle());
+				 addUndo(cmd,transCmd(cmd, true, selected, view.getCircle()));
 			}
 		}
 		else if(selected instanceof HexagonAdapter) {
@@ -291,13 +314,14 @@ public class ToolsController implements Serializable{
 			view.setHexagonAdapter((HexagonAdapter)selected);
 			view.setVisible(true);
 			if(view.isConfirm()) {
-				UpdateHexagonAdapter cmd=new UpdateHexagonAdapter((HexagonAdapter)selected, view.getHexagonAdapter());
-				cmd.execute();
-				model.addUndo(cmd);
-				updateButtons();
-				frame.getView().repaint();
+				cmd=new UpdateHexagonAdapter((HexagonAdapter)selected, view.getHexagonAdapter());
+				LogCommand(cmd, true, selected, view.getHexagonAdapter());
+				addUndo(cmd,transCmd(cmd, true, selected, view.getHexagonAdapter()));
 			}
 		}
+		cmd.execute();
+		updateButtons();
+		frame.getView().repaint();
 	}
 	public void bringToFront(ActionEvent e) {
 		Shape selected=new Point();
@@ -305,9 +329,10 @@ public class ToolsController implements Serializable{
 			if(model.get(i).isSelected()) {selected=model.get(i);break;}
 		}
 		if(model.getAll().indexOf(selected)!=model.getAll().size()-1) {
-			BringToFront cmd=new BringToFront(model,selected);
+			BringToFrontCommand cmd=new BringToFrontCommand(model,selected);
+			LogCommand(cmd, true, selected, null);
 			cmd.execute();
-			model.addUndo(cmd);
+			addUndo(cmd,transCmd(cmd, true, selected, null));
 			updateButtons();
 			frame.getView().repaint();
 		}else JOptionPane.showMessageDialog(null, "Shape is already on the front.");
@@ -318,9 +343,10 @@ public class ToolsController implements Serializable{
 			if(model.get(i).isSelected()) {selected=model.get(i);break;}
 		}
 		if(model.getAll().indexOf(selected)!=model.getAll().size()-1) {
-			ToFront cmd=new ToFront(model,selected);
+			ToFrontCommand cmd=new ToFrontCommand(model,selected);
+			LogCommand(cmd, true, selected, null);
 			cmd.execute();
-			model.addUndo(cmd);
+			addUndo(cmd,transCmd(cmd, true, selected, null));
 			updateButtons();
 			frame.getView().repaint();
 		}else JOptionPane.showMessageDialog(null, "Shape is already on the front.");
@@ -331,22 +357,47 @@ public class ToolsController implements Serializable{
 			if(model.get(i).isSelected()) {selected=model.get(i);break;}
 		}
 		if(model.getAll().indexOf(selected)!=0) {
-			ToBack cmd=new ToBack(model,selected);
+			ToBackCommand cmd=new ToBackCommand(model,selected);
+			LogCommand(cmd, true, selected, null);
 			cmd.execute();
-			model.addUndo(cmd);
+			addUndo(cmd,transCmd(cmd, true, selected, null));
 			updateButtons();
 			frame.getView().repaint();
 		}else JOptionPane.showMessageDialog(null, "Shape is already back.");
 	}
+	public void addUndo(Command cmd,String text)
+	{
+		model.getUndoStack().push(cmd);
+		model.getRedoStack().clear();
+		model.getUndoStackLog().push(text);
+		model.getRedoStackLog().clear();
+	}
+	public void doUndo() {
+		model.getUndoStack().peek().unexecute();
+		model.getRedoStack().push(model.getUndoStack().pop());
+		
+		globalLogger.info(model.getUndoStackLog().peek().replace("_execute_", "_unexecute_"));
+		model.getRedoStackLog().push(model.getUndoStackLog().pop());
+	}
+	public void doRedo()
+	{
+		model.getRedoStack().peek().execute();
+		model.getUndoStack().push(model.getRedoStack().pop());
+		
+		globalLogger.info(model.getRedoStackLog().peek().replace("_unexecute_", "_execute_"));
+		model.getUndoStackLog().push(model.getRedoStackLog().pop());
+	}
+	
 	public void bringToBack(ActionEvent e) {
 		Shape selected=new Point();
 		for(int i=model.getAll().size()-1;i>=0;i--) {
 			if(model.get(i).isSelected()) {selected=model.get(i);break;}
 		}
 		if(model.getAll().indexOf(selected)!=0) {
-			BringToBack cmd=new BringToBack(model,selected);
+			BringToBackCommand cmd=new BringToBackCommand(model,selected);
+			LogCommand(cmd, true, selected, null);
 			cmd.execute();
-			model.addUndo(cmd);
+			addUndo(cmd,transCmd(cmd, true, selected, null));
 			updateButtons();
 			frame.getView().repaint();
 		}else JOptionPane.showMessageDialog(null, "Shape is already back.");

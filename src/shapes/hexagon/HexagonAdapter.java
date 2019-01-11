@@ -50,9 +50,9 @@ public class HexagonAdapter extends SurfaceShape implements Movable{
 
 	@Override
 	public String toString() {
-		return String.format("Hexagon(X=%d,Y=%d,r=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d])", hexagon.getX(),
+		return String.format("Hexagon(X=%d,Y=%d,r=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d],selected=%b)", hexagon.getX(),
 				hexagon.getY(), hexagon.getR(), getColor().getRed(), getColor().getGreen(), getColor().getBlue(),
-				getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue());
+				getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue(),isSelected());
 	}
 	
 	@Override
@@ -120,6 +120,7 @@ public class HexagonAdapter extends SurfaceShape implements Movable{
 	}
 
 	public HexagonAdapter clone() {
-		return new HexagonAdapter(new Hexagon(hexagon.getX(),hexagon.getY(), hexagon.getR()), this.getColor(), this.getInnerColor());
-	}
+		HexagonAdapter h=new HexagonAdapter(new Hexagon(hexagon.getX(),hexagon.getY(), hexagon.getR()), this.getColor(), this.getInnerColor());
+		h.setSelected(isSelected());
+		return h;	}
 }

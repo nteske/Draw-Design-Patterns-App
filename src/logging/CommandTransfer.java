@@ -67,7 +67,7 @@ public class CommandTransfer {
    	 		sp=p;
    	 		int i=model.getAll().indexOf(p);
    			if(className.equals("AddPoint"))cmd=new AddPoint(model,p);
-   			else if(className.equals("RemovePoint"))cmd=new RemovePoint(model,p);
+   			else if(className.equals("RemovePoint"))cmd=new RemovePoint(model,(Point)model.get(i));
    			else if(className.equals("UpdatePoint"))cmd=new UpdatePoint((Point)model.get(i),toPoint(shape2));
    	 		
    	 	}
@@ -80,7 +80,7 @@ public class CommandTransfer {
    	 		int i=model.getAll().indexOf(l);
    			if(className.equals("AddLine"))cmd=new AddLine(model,l);
    			else if(className.equals("UpdateLine"))cmd=new UpdateLine((Line)model.get(i),toLine(shape2));
-   			else if(className.equals("RemoveLine"))cmd=new RemoveLine(model,l);
+   			else if(className.equals("RemoveLine"))cmd=new RemoveLine(model,(Line)model.get(i));
    	 		}
    	 	
    	 	//Square
@@ -90,7 +90,7 @@ public class CommandTransfer {
    	 		sp=s;
    	 		int i=model.getAll().indexOf(s);
    			if(className.equals("AddSquare"))cmd=new AddSquare(model,s);
-   			else if(className.equals("RemoveSquare"))cmd=new RemoveSquare(model,s);
+   			else if(className.equals("RemoveSquare"))cmd=new RemoveSquare(model,(Square)model.get(i));
    			else if(className.equals("UpdateSquare"))cmd=new UpdateSquare((Square)model.get(i),toSquare(shape2));
    	 		}
    	 	
@@ -102,7 +102,7 @@ public class CommandTransfer {
    	 		int i=model.getAll().indexOf(r);
    			if(className.equals("AddRectangle"))cmd=new AddRectangle(model,r);
    			else if(className.equals("UpdateRectangle"))cmd=new UpdateRectangle((Rectangle)model.get(i),toRectangle(shape2));
-   			else if(className.equals("RemoveRectangle"))cmd=new RemoveRectangle(model,r);
+   			else if(className.equals("RemoveRectangle"))cmd=new RemoveRectangle(model,(Rectangle)model.get(i));
    	 		}
    	 	
    	 	else if(shape.split("\\(")[0].equals("Circle")) {
@@ -112,7 +112,7 @@ public class CommandTransfer {
    	 		int i=model.getAll().indexOf(c);
    			if(className.equals("AddCircle"))cmd=new AddCircle(model,c);
    			else if(className.equals("UpdateCircle"))cmd=new UpdateCircle((Circle)model.get(i),toCircle(shape2));
-   			else if(className.equals("RemoveCircle"))cmd=new RemoveCircle(model,c);
+   			else if(className.equals("RemoveCircle"))cmd=new RemoveCircle(model,(Circle)model.get(i));
    			
    	 		}
    	 	else if(shape.split("\\(")[0].equals("Hexagon")) {
@@ -121,16 +121,16 @@ public class CommandTransfer {
    	 		sp=h;
    	 		int i=model.getAll().indexOf(h);
    			if(className.equals("AddHexagonAdapter"))cmd=new AddHexagonAdapter(model,h);
-   			else if(className.equals("RemoveHexagonAdapter"))cmd=new RemoveHexagonAdapter(model,h);
+   			else if(className.equals("RemoveHexagonAdapter"))cmd=new RemoveHexagonAdapter(model,(HexagonAdapter)model.get(i));
    			else if(className.equals("UpdateHexagonAdapter"))cmd=new UpdateHexagonAdapter((HexagonAdapter)model.get(i),toHexagonAdapter(shape2));
    	 		}else return null;
    	 	
    	 	
    	 	if(cmd==null) {
-   	 		if(className.equals("BringToBack"))cmd=new BringToBack(model,sp);
-   	 		else if(className.equals("BringToFront"))cmd=new BringToFront(model,sp);
-   	 		else if(className.equals("ToBack"))cmd=new ToBack(model,sp);
-   	 		else if(className.equals("ToFront"))cmd=new ToFront(model,sp);
+   	 		if(className.equals("BringToBackCommand"))cmd=new BringToBackCommand(model,sp);
+   	 		else if(className.equals("BringToFrontCommand"))cmd=new BringToFrontCommand(model,sp);
+   	 		else if(className.equals("ToBackCommand"))cmd=new ToBackCommand(model,sp);
+   	 		else if(className.equals("ToFrontCommand"))cmd=new ToFrontCommand(model,sp);
    	 	}
    	 	
    	 	if(cmd!=null)
@@ -138,10 +138,11 @@ public class CommandTransfer {
    	 		sp.addObserver(observer);
    	 		if(doneIt.equals("execute")) {
    	 			cmd.execute();
-   	 			model.addUndo(cmd);
+   	 			frame.getToolsController().addUndo(cmd,line);
+   	 			frame.getLogView().getLogPane().setText(frame.getLogView().getLogPane().getText()+line+'\n');
    	 		}
    	 		else {
-   	 			model.doUndo();
+   	 			frame.getToolsController().doUndo();
    	 		}
    	 	frame.getToolsController().updateButtons();
    	 	}
@@ -165,7 +166,12 @@ public class CommandTransfer {
 		int x=Integer.parseInt(flow[0].split("=")[1]);
 		int y=Integer.parseInt(flow[1].split("=")[1]);
 		Color color=getColor(flow[2].split("=")[1]);
-		return new Point(x,y,color);
+		boolean sel=Boolean.parseBoolean(flow[3].split("=")[1]);
+		Point p=new Point(x,y,color);
+		int search=model.getAll().indexOf(p);
+		if(search!=-1)p=(Point) model.get(search);
+		p.setSelected(sel);
+		return p;
 	}
 	
 	private Line toLine(String tekst) {
@@ -175,7 +181,10 @@ public class CommandTransfer {
 		int endX=Integer.parseInt(flow[2].split("=")[1]);
 		int endY=Integer.parseInt(flow[3].split("=")[1]);
 		Color color=getColor(flow[4].split("=")[1]);
-		return new Line(new Point(startX,startY),new Point(endX,endY),color);
+		boolean sel=Boolean.parseBoolean(flow[5].split("=")[1]);
+		Line l=new Line(new Point(startX,startY),new Point(endX,endY),color);
+		l.setSelected(sel);
+		return l;
 	}
 	
 	private Square toSquare(String tekst) {
@@ -186,7 +195,10 @@ public class CommandTransfer {
 		int width=Integer.parseInt(flow[2].split("=")[1]);
 		Color outerColor=getColor(flow[3].split("=")[1]);
 		Color innerColor=getColor(flow[4].split("=")[1]);
-		return new Square(new Point(upperX,upperY), width, outerColor, innerColor);
+		boolean sel=Boolean.parseBoolean(flow[5].split("=")[1]);
+		Square s=new Square(new Point(upperX,upperY), width, outerColor, innerColor);
+		s.setSelected(sel);
+		return s;
 	}
 	
 	private Rectangle toRectangle(String tekst) {
@@ -197,7 +209,10 @@ public class CommandTransfer {
 		int width=Integer.parseInt(flow[3].split("=")[1]);
 		Color outerColor=getColor(flow[4].split("=")[1]);
 		Color innerColor=getColor(flow[5].split("=")[1]);
-		return new Rectangle(new Point(upperX,upperY), height, width, outerColor, innerColor);
+		boolean sel=Boolean.parseBoolean(flow[6].split("=")[1]);
+		Rectangle r=new Rectangle(new Point(upperX,upperY), height, width, outerColor, innerColor);
+		r.setSelected(sel);
+		return r;
 	}
 	
 	private Circle toCircle(String tekst) {
@@ -208,7 +223,10 @@ public class CommandTransfer {
 		int r=Integer.parseInt(flow[2].split("=")[1]);
 		Color outerColor=getColor(flow[3].split("=")[1]);
 		Color innerColor=getColor(flow[4].split("=")[1]);
-		return new Circle(new Point(crX,crY), r, outerColor, innerColor);
+		boolean sel=Boolean.parseBoolean(flow[5].split("=")[1]);
+		Circle c=new Circle(new Point(crX,crY), r, outerColor, innerColor);
+		c.setSelected(sel);
+		return c;
 	}
 	
 	private HexagonAdapter toHexagonAdapter(String tekst) {
@@ -219,7 +237,10 @@ public class CommandTransfer {
 		int r=Integer.parseInt(flow[2].split("=")[1]);
 		Color outerColor=getColor(flow[3].split("=")[1]);
 		Color innerColor=getColor(flow[4].split("=")[1]);
-		return new HexagonAdapter(new Hexagon(crX, crY, r), outerColor, innerColor);
+		boolean sel=Boolean.parseBoolean(flow[5].split("=")[1]);
+		HexagonAdapter h=new HexagonAdapter(new Hexagon(crX, crY, r), outerColor, innerColor);
+		h.setSelected(sel);
+		return h;
 	}
 
 }

@@ -1,4 +1,4 @@
-package modify;
+package dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -200,6 +200,7 @@ public class DialogLine extends JDialog {
 		int endCrdX=Integer.parseInt(endPointX.getText());
 		int endCrdY=Integer.parseInt(endPointY.getText());
 		line=new Line(new Point(stCrdX,stCrdY),new Point(endCrdX,endCrdY),lnColor);
+		line.setSelected(true);
 		confirm=true;
 		setVisible(false);
 		dispose();

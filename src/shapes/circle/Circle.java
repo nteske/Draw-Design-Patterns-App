@@ -56,9 +56,9 @@ public class Circle extends SurfaceShape implements Movable  {
 
 	@Override
 	public String toString() {
-		return String.format("Circle(X=%d,Y=%d,r=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d])", center.getX(),
+		return String.format("Circle(X=%d,Y=%d,r=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d],selected=%b)", center.getX(),
 				center.getY(), radius, getColor().getRed(), getColor().getGreen(), getColor().getBlue(),
-				getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue());
+				getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue(),isSelected());
 	}
 
 	@Override
@@ -126,8 +126,10 @@ public class Circle extends SurfaceShape implements Movable  {
 	}
 	
 	public Circle clone() {
-		return new Circle(center.clone(),
+		Circle c=new Circle(center.clone(),
 				this.radius, this.getColor(), this.getInnerColor());
+		c.setSelected(isSelected());
+		return c;
 	}  
 
 }

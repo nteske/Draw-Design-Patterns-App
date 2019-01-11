@@ -62,9 +62,9 @@ public class Square extends SurfaceShape implements Movable{
 
 	@Override
 	public String toString() {
-		return String.format("Square(UpperX=%d,UpperY=%d,a=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d])",
+		return String.format("Square(UpperX=%d,UpperY=%d,a=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d],selected=%b)",
 				upperLeft.getX(), upperLeft.getY(), sideLength, getColor().getRed(), getColor().getGreen(),
-				getColor().getBlue(), getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue());
+				getColor().getBlue(), getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue(),isSelected());
 	}
 
 	@Override
@@ -134,7 +134,9 @@ public class Square extends SurfaceShape implements Movable{
 	}
 	
 	public Square clone() {
-		return new Square(upperLeft.clone(),
+		Square s=new Square(upperLeft.clone(),
 				sideLength, this.getColor(), this.getInnerColor());
+		s.setSelected(isSelected());
+		return s;
 	}
 }

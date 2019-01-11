@@ -63,9 +63,9 @@ public class Rectangle extends Square{
 	@Override
 	public String toString() {
 		return String.format(
-				"Rectangle(UpperX=%d,UpperY=%d,height=%d,width=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d])",
+				"Rectangle(UpperX=%d,UpperY=%d,height=%d,width=%d,outercolor=[%d-%d-%d],innercolor=[%d-%d-%d],selected=%b)",
 				upperLeft.getX(), upperLeft.getY(), sideLength, width, getColor().getRed(), getColor().getGreen(),
-				getColor().getBlue(), getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue());
+				getColor().getBlue(), getInnerColor().getRed(), getInnerColor().getGreen(), getInnerColor().getBlue(),isSelected());
 	}
 
 	@Override
@@ -107,8 +107,10 @@ public class Rectangle extends Square{
 	}
 	
 	public Rectangle clone() {
-		return new Rectangle(upperLeft.clone(), 
+		Rectangle r=new Rectangle(upperLeft.clone(), 
 				this.getSideLength(), this.width, this.getColor(), this.getInnerColor());
+		r.setSelected(this.isSelected());
+		return r;
 	}
 
 }

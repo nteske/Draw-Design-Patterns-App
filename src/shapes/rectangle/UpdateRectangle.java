@@ -1,6 +1,5 @@
 package shapes.rectangle;
 
-import java.util.logging.Logger;
 
 import shapes.Command;
 
@@ -10,7 +9,6 @@ public class UpdateRectangle implements Command{
 	private Rectangle oldState;
 	private Rectangle newState;
 	private Rectangle originalState;
-	private Logger globalLogger = Logger.getLogger("global");
 	public UpdateRectangle(Rectangle originalState, Rectangle newState) {
 		this.originalState = originalState;
 		this.newState = newState;
@@ -24,7 +22,7 @@ public class UpdateRectangle implements Command{
 		originalState.setSideLength(newState.getSideLength());
 		originalState.setColor(newState.getColor());
 		originalState.setInnerColor(newState.getInnerColor());
-		globalLogger.info(oldState.toString()+"_to_"+originalState.toString());
+		originalState.setSelected(newState.isSelected());
 	}
 
 	@Override
@@ -34,7 +32,7 @@ public class UpdateRectangle implements Command{
 		originalState.setSideLength(oldState.getSideLength());
 		originalState.setColor(oldState.getColor());
 		originalState.setInnerColor(oldState.getInnerColor());
-		globalLogger.info(oldState.toString()+"_to_"+originalState.toString());
+		originalState.setSelected(oldState.isSelected());
 	}
 
 }

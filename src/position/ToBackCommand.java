@@ -1,13 +1,12 @@
 package position;
 
 import java.util.Collections;
-import java.util.logging.Logger;
 
 import model.DrawingModel;
 import shapes.Command;
 import shapes.Shape;
 
-public class ToBack implements Command{
+public class ToBackCommand implements Command{
 	/**
 	 * 
 	 */
@@ -15,8 +14,7 @@ public class ToBack implements Command{
 	private DrawingModel model;
 	private Shape shape;
 	private int oldState;
-	private Logger globalLogger = Logger.getLogger("global");
-	public ToBack(DrawingModel model, Shape shape) {
+	public ToBackCommand(DrawingModel model, Shape shape) {
 		this.model = model;
 		this.shape = shape;
 	}
@@ -24,13 +22,11 @@ public class ToBack implements Command{
 	public void execute() {
 		oldState=model.getAll().indexOf(shape);
 		Collections.swap(model.getAll(), oldState-1, oldState);
-		globalLogger.info(shape.toString());
 	}
 
 	@Override
 	public void unexecute() {
 		Collections.swap(model.getAll(), oldState-1, oldState);
-		globalLogger.info(shape.toString());
 	}
 
 }

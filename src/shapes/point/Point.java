@@ -91,8 +91,8 @@ public class Point extends Shape implements Movable{
 
 	@Override
 	public String toString() {
-		return String.format("Point(x=%d,y=%d,color=[%d-%d-%d])", x, y, getColor().getRed(), getColor().getGreen(),
-				getColor().getBlue());
+		return String.format("Point(x=%d,y=%d,color=[%d-%d-%d],selected=%b)", x, y, getColor().getRed(), getColor().getGreen(),
+				getColor().getBlue(),isSelected());
 	}
 	@Override
 	public void selected(Graphics g) {
@@ -107,6 +107,8 @@ public class Point extends Shape implements Movable{
 	}
 
 	public Point clone() {
-		return new Point(x,y,this.getColor());
+		Point p=new Point(x,y,this.getColor());
+		p.setSelected(isSelected());
+		return p;
 	}
 }

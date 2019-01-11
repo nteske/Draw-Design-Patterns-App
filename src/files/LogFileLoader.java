@@ -11,6 +11,7 @@ import frame.DrawingFrame;
 import logging.CommandTransfer;
 import model.DrawingModel;
 import shapes.Command;
+import shapes.Shape;
 import views.LogParser;
 
 public class LogFileLoader implements AssetLoader {
@@ -38,6 +39,12 @@ public class LogFileLoader implements AssetLoader {
             		 frame.getView().repaint();
             		 if(c==null) {lp.dispose();break;}
             	 }else {lp.dispose();break;}
+            	 for (Shape s : model.getAll()) {
+					if(s.isSelected()) {
+						if(!frame.getToolsController().isEnterSelecting())
+						frame.getToolsController().selectShape(null);
+						break;}
+            	 }
              }
          }catch (Exception e2) {
 				e2.printStackTrace();

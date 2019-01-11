@@ -1,6 +1,5 @@
 package shapes.point;
 
-import java.util.logging.Logger;
 
 import shapes.Command;
 
@@ -10,7 +9,6 @@ public class UpdatePoint implements Command{
 	private Point oldState;
 	private Point newState;
 	private Point originalState;
-	private Logger globalLogger = Logger.getLogger("global");
 
 	public UpdatePoint(Point originalState, Point newState) {
 		this.originalState = originalState;
@@ -23,7 +21,7 @@ public class UpdatePoint implements Command{
 		originalState.setX(newState.getX());
 		originalState.setY(newState.getY());
 		originalState.setColor(newState.getColor());
-		globalLogger.info(oldState.toString()+"_to_"+originalState.toString());
+		originalState.setSelected(newState.isSelected());
 	}
 
 	@Override
@@ -31,8 +29,7 @@ public class UpdatePoint implements Command{
 		originalState.setX(oldState.getX());
 		originalState.setY(oldState.getY());
 		originalState.setColor(oldState.getColor());
-		globalLogger.info(originalState.toString());
-		globalLogger.info(oldState.toString()+"_to_"+originalState.toString());
+		originalState.setSelected(oldState.isSelected());
 	}
 
 }

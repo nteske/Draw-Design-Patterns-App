@@ -1,4 +1,4 @@
-package modify;
+package dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -9,8 +9,8 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import hexagon.Hexagon;
-import shapes.hexagon.HexagonAdapter;
+import shapes.circle.Circle;
+import shapes.point.Point;
 
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
@@ -22,17 +22,19 @@ import javax.swing.JTextField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class DialogHexagon extends JDialog {
+public class DialogCircle extends JDialog {
 
-	private static final long serialVersionUID = -5997628659156166180L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1082472013388572390L;
 	private final JPanel contentPanel = new JPanel();
 	private JTextField tfPointX;
 	private JTextField tfPointY;
 	private JTextField tfRadius;
-	private JButton btnOutercolor,btnInnercolor;
-	
+	private JButton btnInnercolor,btnOutercolor;
 	private Color inner,outer;
-	private HexagonAdapter hexagonAdapter;
+	private Circle circle;
 	private boolean confirm=false;
 
 	/**
@@ -40,7 +42,7 @@ public class DialogHexagon extends JDialog {
 	 */
 	public static void main(String[] args) {
 		try {
-			DialogHexagon dialog = new DialogHexagon();
+			DialogCircle dialog = new DialogCircle();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -51,16 +53,16 @@ public class DialogHexagon extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public DialogHexagon() {
+	public DialogCircle() {
 		setModal(true);
-		setTitle("Modify Hexagon");
-		setBounds(100, 100, 230, 218);
+		setTitle("Modify Circle");
+		setBounds(100, 100, 230, 228);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[]{106, 74, 0};
-		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 27, 29, 39, 0};
+		gbl_contentPanel.columnWidths = new int[]{104, 0, 0};
+		gbl_contentPanel.rowHeights = new int[]{0, 0, 0, 29, 30, 42, 0};
 		gbl_contentPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
 		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		contentPanel.setLayout(gbl_contentPanel);
@@ -200,7 +202,8 @@ public class DialogHexagon extends JDialog {
 			int crdX=Integer.parseInt(tfPointX.getText());
 			int crdY=Integer.parseInt(tfPointY.getText());
 			int radius=Integer.parseInt(tfRadius.getText());
-			hexagonAdapter=new HexagonAdapter(new Hexagon(crdX, crdY, radius), outer, inner);
+			circle=new Circle(new Point(crdX,crdY),radius,outer,inner);
+			circle.setSelected(true);
 			confirm=true;
 			setVisible(false);
 			dispose();
@@ -232,17 +235,17 @@ public class DialogHexagon extends JDialog {
 		btnOutercolor.setBackground(outer);
 	}
 
-	public HexagonAdapter getHexagonAdapter() {
-		return hexagonAdapter;
+	public Circle getCircle() {
+		return circle;
 	}
 
-	public void setHexagonAdapter(HexagonAdapter hexagonAdapter) {
-		this.hexagonAdapter = hexagonAdapter;
-		tfPointX.setText(String.valueOf(hexagonAdapter.getHexagon().getX()));
-		tfPointY.setText(String.valueOf(hexagonAdapter.getHexagon().getY()));
-		tfRadius.setText(String.valueOf(hexagonAdapter.getHexagon().getR()));
-		setOuter(hexagonAdapter.getColor());
-		setInner(hexagonAdapter.getInnerColor());
+	public void setCircle(Circle circle) {
+		this.circle = circle;
+		tfPointX.setText(String.valueOf(circle.getCenter().getX()));
+		tfPointY.setText(String.valueOf(circle.getCenter().getY()));
+		tfRadius.setText(String.valueOf(circle.getRadius()));
+		setOuter(circle.getColor());
+		setInner(circle.getInnerColor());
 	}
 
 	public boolean isConfirm() {

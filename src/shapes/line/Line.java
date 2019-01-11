@@ -35,9 +35,9 @@ public class Line extends Shape{
 
 	@Override
 	public String toString() {
-		return String.format("Line(startX=%d,startY=%d,endX=%d,endY=%d,color=[%d-%d-%d])", pointStart.getX(),
+		return String.format("Line(startX=%d,startY=%d,endX=%d,endY=%d,color=[%d-%d-%d],selected=%b)", pointStart.getX(),
 				pointStart.getY(), pointEnd.getX(), pointEnd.getY(), getColor().getRed(), getColor().getGreen(),
-				getColor().getBlue());
+				getColor().getBlue(),isSelected());
 	}
 
 	@Override
@@ -111,7 +111,9 @@ public class Line extends Shape{
 	}
 
 	public Line clone() {
-		return new Line(pointStart.clone(),pointEnd.clone(),this.getColor());
+		Line l=new Line(pointStart.clone(),pointEnd.clone(),this.getColor());
+		l.setSelected(isSelected());
+		return l;
 	}
 
 }
