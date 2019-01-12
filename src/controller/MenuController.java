@@ -2,6 +2,7 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.io.Serializable;
+import java.util.Stack;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -13,6 +14,7 @@ import files.LogFileLoader;
 import files.SerializableFileLoader;
 import frame.DrawingFrame;
 import model.DrawingModel;
+import shapes.Command;
 
 public class MenuController implements Serializable {
 	/**
@@ -21,6 +23,11 @@ public class MenuController implements Serializable {
 	private static final long serialVersionUID = 5158203942344909976L;
 	private DrawingModel model;
 	private DrawingFrame frame;
+	private Stack<Command> undoStack=new Stack<Command>();
+	private Stack<Command> redoStack=new Stack<Command>();
+	
+	private Stack<String> undoStackLog=new Stack<String>();
+	private Stack<String> redoStackLog=new Stack<String>();
 	public MenuController(DrawingModel model, DrawingFrame frame) {
 		this.model = model;
 		this.frame = frame;
@@ -32,8 +39,8 @@ public class MenuController implements Serializable {
 			if(frame.getToolsController().isEnterSelecting())
 				frame.getToolsController().selectShape(null);
 			model.getAll().clear();
-			model.getUndoStack().clear();
-			model.getRedoStack().clear();
+			getUndoStack().clear();
+			getRedoStack().clear();
 			frame.getLogView().getLogPane().setText("");
 			frame.getToolsController().updateButtons();
 			frame.getView().repaint();
@@ -82,5 +89,26 @@ public class MenuController implements Serializable {
         }
 	}
 	
-	
+	public Stack<Command> getUndoStack(){
+		return undoStack;
+	}
+	public Stack<Command> getRedoStack(){
+		return redoStack;
+	}
+
+	public Stack<String> getUndoStackLog() {
+		return undoStackLog;
+	}
+
+	public void setUndoStackLog(Stack<String> undoStackLog) {
+		this.undoStackLog = undoStackLog;
+	}
+
+	public Stack<String> getRedoStackLog() {
+		return redoStackLog;
+	}
+
+	public void setRedoStackLog(Stack<String> redoStackLog) {
+		this.redoStackLog = redoStackLog;
+	}
 }

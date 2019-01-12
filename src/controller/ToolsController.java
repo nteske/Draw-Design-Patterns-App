@@ -108,20 +108,20 @@ public class ToolsController implements Serializable{
 	}
 	//updateButtons();
 	public void updateButtons() {
-		if(model.getUndoStack().size()==0)frame.getSelViews().getBtnUndo().setEnabled(false);
+		if(frame.getMenuController().getUndoStack().size()==0)frame.getSelViews().getBtnUndo().setEnabled(false);
 		else frame.getSelViews().getBtnUndo().setEnabled(true);
-		if(model.getRedoStack().size()==0)frame.getSelViews().getBtnRedo().setEnabled(false);
+		if(frame.getMenuController().getRedoStack().size()==0)frame.getSelViews().getBtnRedo().setEnabled(false);
 		else frame.getSelViews().getBtnRedo().setEnabled(true);
 	}
 	
 	public void undoCommand() {
-		if(model.getUndoStack().size()!=0) {
+		if(frame.getMenuController().getUndoStack().size()!=0) {
 		do {
-		Command old=model.getUndoStack().peek();
+		Command old=frame.getMenuController().getUndoStack().peek();
 		doUndo();
 		if(!isRemoveCommand(old))break;
 		}
-		while(!model.getUndoStack().isEmpty()&&isRemoveCommand(model.getUndoStack().peek()));
+		while(!frame.getMenuController().getUndoStack().isEmpty()&&isRemoveCommand(frame.getMenuController().getUndoStack().peek()));
 		ActivateSel();
 		frame.getView().repaint();
 		updateButtons();
@@ -141,14 +141,14 @@ public class ToolsController implements Serializable{
 		else return false;
 	}
 	public void redoCommand() {
-		if(model.getRedoStack().size()!=0) {
+		if(frame.getMenuController().getRedoStack().size()!=0) {
 			
 		do {
-			Command old=model.getRedoStack().peek();
+			Command old=frame.getMenuController().getRedoStack().peek();
 			doRedo();
 			if(!isRemoveCommand(old))break;
 		}
-		while(!model.getRedoStack().isEmpty()&&isRemoveCommand(model.getRedoStack().peek()));
+		while(!frame.getMenuController().getRedoStack().isEmpty()&&isRemoveCommand(frame.getMenuController().getRedoStack().peek()));
 		
 		ActivateSel();
 		frame.getView().repaint();
@@ -367,25 +367,25 @@ public class ToolsController implements Serializable{
 	}
 	public void addUndo(Command cmd,String text)
 	{
-		model.getUndoStack().push(cmd);
-		model.getRedoStack().clear();
-		model.getUndoStackLog().push(text);
-		model.getRedoStackLog().clear();
+		frame.getMenuController().getUndoStack().push(cmd);
+		frame.getMenuController().getRedoStack().clear();
+		frame.getMenuController().getUndoStackLog().push(text);
+		frame.getMenuController().getRedoStackLog().clear();
 	}
 	public void doUndo() {
-		model.getUndoStack().peek().unexecute();
-		model.getRedoStack().push(model.getUndoStack().pop());
+		frame.getMenuController().getUndoStack().peek().unexecute();
+		frame.getMenuController().getRedoStack().push(frame.getMenuController().getUndoStack().pop());
 		
-		globalLogger.info(model.getUndoStackLog().peek().replace("_execute_", "_unexecute_"));
-		model.getRedoStackLog().push(model.getUndoStackLog().pop());
+		globalLogger.info(frame.getMenuController().getUndoStackLog().peek().replace("_execute_", "_unexecute_"));
+		frame.getMenuController().getRedoStackLog().push(frame.getMenuController().getUndoStackLog().pop());
 	}
 	public void doRedo()
 	{
-		model.getRedoStack().peek().execute();
-		model.getUndoStack().push(model.getRedoStack().pop());
+		frame.getMenuController().getRedoStack().peek().execute();
+		frame.getMenuController().getUndoStack().push(frame.getMenuController().getRedoStack().pop());
 		
-		globalLogger.info(model.getRedoStackLog().peek().replace("_unexecute_", "_execute_"));
-		model.getUndoStackLog().push(model.getRedoStackLog().pop());
+		globalLogger.info(frame.getMenuController().getRedoStackLog().peek().replace("_unexecute_", "_execute_"));
+		frame.getMenuController().getUndoStackLog().push(frame.getMenuController().getRedoStackLog().pop());
 	}
 	
 	public void bringToBack(ActionEvent e) {
